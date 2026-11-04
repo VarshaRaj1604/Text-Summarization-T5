@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text Summarizer</title>
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 40px 20px;
+        background: #FFF7ED;
+        color: #333;
+    }
+
+    .container {
+        max-width: 750px;
+        margin: 30px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+        text-align: center;
+        color: #EA580C;
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #777;
+        margin-bottom: 30px;
+    }
+
+    label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    textarea {
+        width: 100%;
+        height: 200px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 15px;
+        resize: vertical;
+        outline: none;
+    }
+
+    textarea:focus {
+        border-color: #FB923C;
+    }
+
+    button {
+        width: 100%;
+        margin-top: 18px;
+        padding: 14px;
+        background: #F97316;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #EA580C;
+    }
+
+    button:disabled {
+        background: #aaa;
+        cursor: not-allowed;
+    }
+
+    #summary-output {
+        margin-top: 30px;
+        padding: 20px;
+        background: #FFF7ED;
+        border: 1px solid #FED7AA;
+        border-radius: 10px;
+        min-height: 100px;
+    }
+
+    #summary-heading {
+        color: #C2410C;
+        margin-top: 0;
+    }
+
+    #summary-text {
+        line-height: 1.7;
+        white-space: pre-wrap;
+    }
+
+    @media (max-width: 600px) {
+        .container {
+            padding: 20px;
+        }
+    }
+</style>
+
+
+</head>
+
+<body>
+
+
+<div class="container">
+
+    <h1>AI Text Summarizer</h1>
+
+    <p class="subtitle">
+        Powered by Hugging Face Transformers (T5)
+    </p>
+
+    <form id="summarization-form">
+
+        <label for="dialogue-input">
+            Enter Your Text
+        </label>
+
+        <textarea
+            id="dialogue-input"
+            placeholder="Paste your conversation or text here..."
+            required
+        ></textarea>
+
+        <button type="submit">Generate Summary</button>
+
+    </form>
+
+    <div id="summary-output">
+
+        <h3 id="summary-heading">Your Summary</h3>
+
+        <p id="summary-text">
+            Your generated summary will appear here.
+        </p>
+
+    </div>
+
+</div>
+
+<script>
+    document.getElementById("summarization-form")
+    .addEventListener("submit", async (e) => {
+
+        e.preventDefault();
+
+        const dialogueInput = document.getElementById("dialogue-input");
+        const summaryText = document.getElementById("summary-text");
+        const submitButton = e.target.querySelector("button");
+
+        const dialogue = dialogueInput.value.trim();
+
+        if (!dialogue) return;
+
+        summaryText.innerText = "Generating summary... Please wait.";
+        submitButton.disabled = true;
+
+        try {
+
+            const response = await fetch("/summarize/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ dialogue })
+            });
+
+            if (!response.ok) {
+                throw new Error("Unable to generate summary.");
+            }
+
+            const data = await response.json();
+
+            summaryText.innerText =
+                data.summary || data.error || "No summary returned.";
+
+        } catch (err) {
+
+            summaryText.innerText = "Error: " + err.message;
+
+        } finally {
+
+            submitButton.disabled = false;
+
+        }
+
+    });
+</script>
+
+
+</body>
+</html>
